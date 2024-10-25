@@ -1,31 +1,36 @@
 package com.tbond.yumdash;
 
+import com.tbond.yumdash.test.BeansTester;
+import com.tbond.yumdash.test.ShowBean;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.annotation.Order;
+import org.springframework.context.annotation.Scope;
 
 @SpringBootApplication
-public class YumDashApplication
-//implements CommandLineRunner
-{
+public class YumDashApplication {
 
     public static void main(String[] args) {
+
         SpringApplication.run(YumDashApplication.class, args);
-        System.out.println("main is finished!");
     }
 
-//    @Override
-//    public void run(String... args) throws Exception {
-//        System.out.println("Hello World! It's YumDash project!");
-//    }
+    @Bean
+    @Scope("prototype")
+    ShowBean showBean() {
+        return new ShowBean();
+    }
+
+    BeansTester beansTester() {
+        return new BeansTester(showBean(), showBean());
+    }
 
     @Bean
-    @Order(2)
-    public CommandLineRunner commandLineRunner() {
+    CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
-            System.out.println("Hello World");
+            beansTester().compareBeans();
         };
     }
 }

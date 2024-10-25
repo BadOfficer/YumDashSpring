@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu</title>
+</head>
+<body>
+    <h1>Our Menu</h1>
+    <ul>
+        <li th:each="item : ${items}">
+            <img th:src="@{${item.image}}" />
+            <h2 th:text="${item.title}" />
+            <p th:text="${item.description}" />
+            <span th:text="${item.price}" />
+
+        </li>
+    </ul>
+</body>
+</html>
