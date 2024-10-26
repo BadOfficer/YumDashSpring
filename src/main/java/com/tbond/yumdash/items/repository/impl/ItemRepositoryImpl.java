@@ -20,6 +20,6 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     public List<Item> findItemsByName(String name) {
-        return items.stream().filter(item -> item.getTitle().equals(name)).toList();
+        return items.stream().filter(item -> item.getTitle().equalsIgnoreCase(name)).toList();
     }
 }
