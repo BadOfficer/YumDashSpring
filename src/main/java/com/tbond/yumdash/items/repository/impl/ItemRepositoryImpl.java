@@ -10,9 +10,9 @@ import java.util.List;
 @Repository
 public class ItemRepositoryImpl implements ItemRepository {
     private final List<Item> items = Arrays.asList(
-            new Item("Cheeseburger", "Juicy beef patty, melted cheddar cheese, fresh vegetables, and sauce on a soft bun.", 45, ""),
-            new Item("French Fries", "Golden, crispy fries, perfectly seasoned with sea salt.", 2, ""),
-            new Item("Chicken Nuggets", "Crispy breaded nuggets made with tender chicken fillet.", 5, "")
+            new Item("", "Juicy beef patty, melted cheddar cheese, fresh vegetables, and sauce on a soft bun.", 45, "", 1),
+            new Item("French Fries", "Golden, crispy fries, perfectly seasoned with sea salt.", 2, "", 0),
+            new Item("Chicken Nuggets", "Crispy breaded nuggets made with tender chicken fillet.", 5, "", 5)
     );
 
     public List<Item> findAllItems() {

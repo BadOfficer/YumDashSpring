@@ -35,17 +35,61 @@
             background-color: aquamarine;
             border-radius: 5px;
         }
+        .text{
+            flex: 1 1 0;
+        }
+        .default-image {
+            width: 100px;
+            height: 100px;
+            background-color: aliceblue;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .default-image::before{
+            content: '100x100';
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            position: absolute;
+        }
+        .quantity {
+            background-color: orange;
+            border-radius: 10px;
+        }
+
+        .info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
     </style>
 </head>
 <body>
     <h1>Our Menu</h1>
     <ul>
+        <!-- each operator -->
         <li th:each="item : ${items}">
-            <img th:src="@{${item.image}}" />
-            <h2 th:text="${item.title}" />
-            <p th:text="${item.description}" />
-            <span th:text="${item.price} + ' uah'" />
+            <!-- IF operator -->
+            <img th:if="${item.image != ''}" th:src="@{${item.image}}" />
 
+            <!-- UNLESS operator -->
+            <div th:unless="${item.image != ''}">
+                <div class="default-image" />
+            </div>
+
+            <!-- ELVIS operator -->
+            <h2 th:text="${item.title != '' ? item.title : 'Title not available'}"/>
+            <p th:text="${item.description}" class="text"/>
+            <div class="info">
+                <span th:text="${item.price} + ' uah'" />
+                <div th:switch="${item.quantity}">
+                    <span class="quantity" th:case="0">Not available</span>
+                    <span class="quantity" th:case="1" th:text="${item.quantity} + ' item available'"/>
+                    <span class="quantity" th:case="*" th:text="${item.quantity} + ' items available'"/>
+                </div>
+            </div>
         </li>
     </ul>
 </body>
