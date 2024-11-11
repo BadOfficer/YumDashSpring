@@ -35,13 +35,13 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
+    public ResponseEntity<Category> createCategory(@RequestBody @Valid CategoryDto categoryDto) {
         return ResponseEntity.ok(categoryService.createCategory(categoryDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Category> updateCategory(
-            @Valid @RequestBody CategoryDto categoryDto,
+            @RequestBody @Valid CategoryDto categoryDto,
             @PathVariable String id) {
         return ResponseEntity.ok(categoryService.updateCategory(categoryDto, id));
     }
