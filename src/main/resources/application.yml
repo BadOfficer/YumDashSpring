@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: YumDash
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    path: /swagger-ui.html
