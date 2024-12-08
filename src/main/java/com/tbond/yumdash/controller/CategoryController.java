@@ -1,9 +1,11 @@
 package com.tbond.yumdash.controller;
 
-import com.tbond.yumdash.domain.Category;
-import com.tbond.yumdash.dto.category.CategoryDto;
+import com.tbond.yumdash.dto.category.CategoryRequestDto;
+import com.tbond.yumdash.dto.category.CategoryResponseDto;
 import com.tbond.yumdash.service.CategoryService;
+import com.tbond.yumdash.service.mappers.CategoryMapper;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -13,41 +15,38 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/categories")
 @Validated
+@AllArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
 
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryResponseDto> getCategoryById(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryMapper.toCategoryResponseDto(categoryService.getCategoryById(id)));
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "") String name
-    ) {
-        return ResponseEntity.ok(categoryService.getAllCategories(name, page, size));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable String id) {
-        return ResponseEntity.ok(categoryService.getCategoryById(id));
+    public ResponseEntity<List<CategoryResponseDto>> getAllCategories() {
+        return ResponseEntity.ok(categoryMapper.toCategoryResponseDtoList(categoryService.getAllCategories()));
     }
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody @Valid CategoryDto categoryDto) {
-        return ResponseEntity.ok(categoryService.createCategory(categoryDto));
+    public ResponseEntity<CategoryResponseDto> createCategory(@Valid @RequestBody CategoryRequestDto categoryDto) {
+        return ResponseEntity.ok(categoryMapper.toCategoryResponseDto(categoryService.createCategory(categoryDto)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(
-            @RequestBody @Valid CategoryDto categoryDto,
-            @PathVariable String id) {
-        return ResponseEntity.ok(categoryService.updateCategory(categoryDto, id));
+    public ResponseEntity<CategoryResponseDto> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequestDto categoryDto) {
+        return ResponseEntity.ok(categoryMapper.toCategoryResponseDto(categoryService.updateCategory(id, categoryDto)));
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<CategoryResponseDto> getCategoryByName(@PathVariable String name) {
+        return ResponseEntity.ok(categoryMapper.toCategoryResponseDto(categoryService.getCategoryByName(name)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable String id) {
-        return ResponseEntity.ok(categoryService.deleteCategory(id));
+    public void deleteCategory(@PathVariable Long id) {
+        categoryService.deleteCategory(id);
     }
 }

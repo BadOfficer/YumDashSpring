@@ -1,12 +1,11 @@
 package com.tbond.yumdash.dto.category;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Value;
 
 @Value
-public class CategoryDto {
+public class CategoryRequestDto {
     @NotBlank(message = "Name is mandatory")
     @Size(max = 100, message = "Name cannot exceed 100 characters")
     String name;

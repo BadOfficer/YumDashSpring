@@ -8,7 +8,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class Category {
-    UUID id;
+    Long id;
     String name;
     String description;
 }

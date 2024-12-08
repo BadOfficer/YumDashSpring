@@ -1,19 +1,21 @@
 package com.tbond.yumdash.service;
 
 import com.tbond.yumdash.domain.Category;
-import com.tbond.yumdash.dto.category.CategoryDto;
+import com.tbond.yumdash.dto.category.CategoryRequestDto;
 
 import java.util.List;
 
 
 public interface CategoryService {
-    Category createCategory(CategoryDto categoryDto);
+    Category createCategory(CategoryRequestDto categoryDto);
 
-    Category updateCategory(CategoryDto categoryDto, String categoryId);
+    Category updateCategory(Long id, CategoryRequestDto categoryDto);
 
-    List<Category> getAllCategories(String name, int page, int size);
+    List<Category> getAllCategories();
 
-    Category getCategoryById(String categoryId);
+    Category getCategoryById(Long id);
 
-    String deleteCategory(String categoryId);
+    Category getCategoryByName(String categoryName);
+
+    void deleteCategory(Long id);
 }
