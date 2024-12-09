@@ -3,6 +3,7 @@ package com.tbond.yumdash.repository.impl;
 import com.tbond.yumdash.domain.Category;
 import com.tbond.yumdash.repository.CategoryMapper;
 import com.tbond.yumdash.repository.CategoryRepository;
+import com.tbond.yumdash.repository.entity.CategoryEntity;
 import com.tbond.yumdash.service.exception.CategoryNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,30 +35,28 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO categories (name, description) VALUES (?, ?)",
+            PreparedStatement ps = con.prepareStatement("INSERT INTO categories (title) VALUES (?)",
                     new String[]{"id"});
 
-            ps.setString(1, category.getName());
-            ps.setString(2, category.getDescription());
+            ps.setString(1, category.getTitle());
             return ps;
         }, keyHolder);
 
         Number key = keyHolder.getKey();
 
+        assert key != null;
+
         return Category.builder()
                 .id(key.longValue())
-                .name(category.getName())
-                .description(category.getDescription()).build();
+                .title(category.getTitle()).build();
     }
 
     public Category update(Long id, Category category) {
-        jdbcTemplate.update("UPDATE categories SET name=?, description=? WHERE id=?", category.getName(),
-                category.getDescription(), id);
+        jdbcTemplate.update("UPDATE categories SET title=? WHERE id=?", category.getTitle(), id);
 
         return Category.builder()
                 .id(id)
-                .name(category.getName())
-                .description(category.getDescription())
+                .title(category.getTitle())
                 .build();
     }
 

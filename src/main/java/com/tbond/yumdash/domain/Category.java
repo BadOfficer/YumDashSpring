@@ -9,6 +9,5 @@ import java.util.UUID;
 @Builder
 public class Category {
     Long id;
-    String name;
-    String description;
+    String title;
 }

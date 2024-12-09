@@ -1,6 +1,7 @@
 package com.tbond.yumdash.exception;
 
 import com.tbond.yumdash.service.exception.CategoryNotFoundException;
+import com.tbond.yumdash.service.exception.ProductNotFoundException;
 import org.springframework.http.*;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -22,6 +23,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problemDetail.setType(URI.create("category-not-found"));
         problemDetail.setTitle("Category Not Found");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ProblemDetail handleProductNotFoundException(ProductNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problemDetail.setType(URI.create("product-not-found"));
+        problemDetail.setTitle("Product Not Found");
         return problemDetail;
     }
 

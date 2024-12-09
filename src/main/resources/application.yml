@@ -8,6 +8,10 @@ spring:
     password: root
     driver-class-name: org.postgresql.Driver
 
+  jpa:
+    hibernate:
+      ddl-auto: update
+
 springdoc:
   api-docs:
     enabled: true
