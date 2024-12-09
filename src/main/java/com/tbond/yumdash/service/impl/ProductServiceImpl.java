@@ -2,9 +2,7 @@ package com.tbond.yumdash.service.impl;
 
 import com.tbond.yumdash.domain.Category;
 import com.tbond.yumdash.domain.Product;
-import com.tbond.yumdash.dto.PaginatedResponseDto;
 import com.tbond.yumdash.dto.product.ProductRequestDto;
-import com.tbond.yumdash.dto.product.ProductResponseDto;
 import com.tbond.yumdash.repository.CategoryRepository;
 import com.tbond.yumdash.repository.ProductRepository;
 import com.tbond.yumdash.repository.entity.ProductEntity;
@@ -16,11 +14,9 @@ import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 import static com.tbond.yumdash.utils.SlugUtils.generateSlug;
@@ -71,23 +67,20 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Product> getProductsByCategory(Long categoryId) {
-        return productMapper.toProductList(productRepository.findByCategory(categoryId));
+    public Page<ProductEntity> getProductsByCategory(Long categoryId, Integer limit, Integer offset) {
+        return productRepository.findByCategory(categoryId, PageRequest.of(offset, limit));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PaginatedResponseDto<ProductResponseDto> getProducts(Integer page) {
-        int limit = 10;
-        Pageable pageable = PageRequest.of(page, limit);
-        Page<ProductEntity> pageProducts = productRepository.findAll(pageable);
+    public Page<ProductEntity> getProducts(Integer limit, Integer offset) {
+        return productRepository.findAll(PageRequest.of(offset, limit));
+    }
 
-        return PaginatedResponseDto.<ProductResponseDto>builder()
-                .data(productMapper.toProductResponseDtoList(productMapper.toProductList(pageProducts.getContent())))
-                .totalElements(pageProducts.getTotalElements())
-                .totalPages(pageProducts.getTotalPages())
-                .currentPage(page)
-                .build();
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductEntity> getProductsByTitle(String title, Integer offset, Integer limit) {
+        return productRepository.findByTitleContainingIgnoreCase(title, PageRequest.of(offset, limit));
     }
 
     @Override

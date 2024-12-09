@@ -1,6 +1,8 @@
 package com.tbond.yumdash.repository;
 
 import com.tbond.yumdash.repository.entity.ProductEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +14,7 @@ public interface ProductRepository extends NaturalIdRepository<ProductEntity, UU
     ProductEntity findBySlug(String productSlug);
 
     @Query("SELECT p FROM ProductEntity p WHERE p.category.id = :categoryId")
-    List<ProductEntity> findByCategory(Long categoryId);
+    Page<ProductEntity> findByCategory(Long categoryId, Pageable pageable);
+
+    Page<ProductEntity> findByTitleContainingIgnoreCase(String name, Pageable pageable);
 }

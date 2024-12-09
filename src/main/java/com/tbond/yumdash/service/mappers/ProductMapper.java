@@ -5,6 +5,7 @@ import com.tbond.yumdash.dto.product.ProductResponseDto;
 import com.tbond.yumdash.repository.entity.ProductEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
