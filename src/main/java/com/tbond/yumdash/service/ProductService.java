@@ -1,5 +1,6 @@
 package com.tbond.yumdash.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tbond.yumdash.domain.Product;
 import com.tbond.yumdash.dto.PaginatedResponseDto;
 import com.tbond.yumdash.dto.product.ProductRequestDto;
@@ -7,6 +8,7 @@ import com.tbond.yumdash.dto.product.ProductResponseDto;
 import com.tbond.yumdash.repository.entity.ProductEntity;
 import org.springframework.data.domain.Page;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 

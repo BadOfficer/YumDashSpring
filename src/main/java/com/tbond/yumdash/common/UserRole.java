@@ -4,5 +4,5 @@ public enum UserRole {
     CUSTOMER,
     COURIER,
     ADMIN,
-    WORKER
+    EMPLOYEE
 }

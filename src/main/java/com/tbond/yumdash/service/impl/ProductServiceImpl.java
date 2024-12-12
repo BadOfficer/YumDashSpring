@@ -1,5 +1,9 @@
 package com.tbond.yumdash.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tbond.yumdash.common.ProductSize;
 import com.tbond.yumdash.domain.Category;
 import com.tbond.yumdash.domain.Product;
 import com.tbond.yumdash.dto.product.ProductRequestDto;
@@ -10,6 +14,7 @@ import com.tbond.yumdash.service.ProductService;
 import com.tbond.yumdash.service.exception.ProductNotFoundException;
 import com.tbond.yumdash.service.mappers.CategoryMapper;
 import com.tbond.yumdash.service.mappers.ProductMapper;
+import com.tbond.yumdash.utils.ImagesUtils;
 import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +22,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import static com.tbond.yumdash.utils.SlugUtils.generateSlug;
@@ -28,24 +35,28 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final ObjectMapper objectMapper;
+    private final ImagesUtils imagesUtils;
 
     @Override
     @Transactional
     public Product createProduct(ProductRequestDto productDto) {
-
-        Category category = categoryRepository.findById(productDto.getCategoryId());
-
-        Product newProduct = Product.builder()
-                .title(productDto.getTitle())
-                .category(category)
-                .productSlug(generateSlug(productDto.getTitle()))
-                .productSizes(productDto.getSizes())
-                .image(productDto.getImage())
-                .discount(productDto.getDiscount())
-                .description(productDto.getDescription())
-                .build();
-
         try {
+            Category category = categoryRepository.findById(productDto.getCategoryId());
+
+            List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {});
+            String imagePath = imagesUtils.saveImage(productDto.getImage());
+
+            Product newProduct = Product.builder()
+                    .title(productDto.getTitle())
+                    .category(category)
+                    .productSlug(generateSlug(productDto.getTitle()))
+                    .productSizes(sizes)
+                    .image(imagePath)
+                    .discount(productDto.getDiscount())
+                    .description(productDto.getDescription())
+                    .build();
+
             return productMapper.toProduct(productRepository.save(productMapper.toProductEntity(newProduct)));
         } catch (Exception e) {
             throw new PersistenceException(e);
@@ -86,23 +97,26 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public Product updateProduct(UUID productId, ProductRequestDto productDto) {
-        ProductEntity product = productRepository.findByNaturalId(productId)
-                .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
-
-        Category category = categoryRepository.findById(productDto.getCategoryId());
-
-        System.out.println(category.getId());
-
-        product.setId(product.getId());
-        product.setTitle(productDto.getTitle());
-        product.setCategory(categoryMapper.toCategoryEntity(category));
-        product.setDescription(productDto.getDescription());
-        product.setImage(productDto.getImage());
-        product.setRating(product.getRating());
-        product.setProductSizes(productDto.getSizes());
-        product.setDiscount(productDto.getDiscount());
-
         try {
+            ProductEntity product = productRepository.findByNaturalId(productId)
+                    .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+
+            List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {});
+            Category category = categoryRepository.findById(productDto.getCategoryId());
+            String imagePath = imagesUtils.saveImage(productDto.getImage());
+
+            if (imagePath != null) {
+                product.setImage(imagePath);
+            }
+
+            product.setId(product.getId());
+            product.setTitle(productDto.getTitle());
+            product.setCategory(categoryMapper.toCategoryEntity(category));
+            product.setDescription(productDto.getDescription());
+            product.setRating(product.getRating());
+            product.setProductSizes(sizes);
+            product.setDiscount(productDto.getDiscount());
+
             return productMapper.toProduct(productRepository.save(product));
         } catch (Exception e) {
             throw new PersistenceException(e);

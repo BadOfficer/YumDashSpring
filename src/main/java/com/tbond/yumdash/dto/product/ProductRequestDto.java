@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,9 +22,10 @@ public class ProductRequestDto {
     String description;
 
     @NotBlank(message = "Image is mandatory")
-    String image;
+    MultipartFile image;
 
-    List<ProductSize> sizes;
+    @NotBlank(message = "Sizes is mandatory")
+    String sizes;
 
     @NotNull(message = "Category is mandatory")
     Long categoryId;
