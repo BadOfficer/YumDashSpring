@@ -12,6 +12,9 @@ import com.tbond.yumdash.service.ProductService;
 import com.tbond.yumdash.service.mappers.ProductMapper;
 import com.tbond.yumdash.utils.ImagesUtils;
 import jakarta.validation.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -49,22 +52,9 @@ public class ProductController {
                 .sizes(sizes)
                 .categoryId(categoryId)
                 .image(image)
-                .discount(discount).build();
+                .discount(discount)
+                .build();
 
-//        try (ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
-//            List<FieldsAndReason> fieldsAndReasons = validatorFactory.getValidator().validate(productRequestDto).stream()
-//                    .map(violation -> {
-//                        return FieldsAndReason.builder()
-//                                .field(violation.getPropertyPath().toString())
-//                                .reason(violation.getMessage())
-//                                .build();
-//                    })
-//                    .toList();
-////            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getValidationErrors(fieldsAndReasons));
-//            throw new MethodArgumentNotValidException()
-//        }
-
-//        Set<ConstraintViolation<ProductRequestDto>> constraintViolations = Validation.buildDefaultValidatorFactory().getValidator().validate(productRequestDto);
         return ResponseEntity.ok(productMapper.toProductResponseDto(productService.createProduct(productRequestDto)));
     }
 
@@ -129,7 +119,8 @@ public class ProductController {
                 .sizes(sizes)
                 .categoryId(categoryId)
                 .image(image)
-                .discount(discount).build();
+                .discount(discount)
+                .build();
 
         return ResponseEntity.ok(productMapper.toProductResponseDto(productService.updateProduct(id, productRequestDto)));
     }

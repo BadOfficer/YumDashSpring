@@ -31,10 +31,10 @@ public class UserEntity {
     @Column(nullable = false, unique = true)
     String email;
 
-    @Column(nullable = false)
+    @Column
     String avatar;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     String phone;
 
     @NaturalId
@@ -42,11 +42,12 @@ public class UserEntity {
     UUID reference;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     UserRole role;
 
     Address address;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "cart_id", referencedColumnName = "id")
     CartEntity cart;
 }

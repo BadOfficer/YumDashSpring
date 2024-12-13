@@ -19,9 +19,11 @@ public class CartEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @OneToOne(mappedBy = "cart")
     UserEntity user;
+
+    @Column(nullable = false)
+    Double totalPrice;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CartItemEntity> items;

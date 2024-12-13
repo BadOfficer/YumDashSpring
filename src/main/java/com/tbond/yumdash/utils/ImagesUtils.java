@@ -20,13 +20,13 @@ public class ImagesUtils {
             return null;
         }
         Path uploadPath = Paths.get(uploadDir);
-        if(!Files.exists(uploadPath)) {
+        if (!Files.exists(uploadPath)) {
             Files.createDirectory(uploadPath);
         }
         String fileName = image.getOriginalFilename();
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return filePath.toString();
+        return fileName;
     }
 }
