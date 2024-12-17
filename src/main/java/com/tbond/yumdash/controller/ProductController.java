@@ -1,34 +1,21 @@
 package com.tbond.yumdash.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tbond.yumdash.common.ProductSize;
 import com.tbond.yumdash.dto.PaginatedResponseDto;
 import com.tbond.yumdash.dto.product.ProductRequestDto;
 import com.tbond.yumdash.dto.product.ProductResponseDto;
-import com.tbond.yumdash.exception.FieldsAndReason;
 import com.tbond.yumdash.repository.entity.ProductEntity;
 import com.tbond.yumdash.service.ProductService;
 import com.tbond.yumdash.service.mappers.ProductMapper;
-import com.tbond.yumdash.utils.ImagesUtils;
-import jakarta.validation.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
-
-import static com.tbond.yumdash.utils.PaymentDetailsUtils.getValidationErrors;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -39,12 +26,12 @@ public class ProductController {
     private final ProductMapper productMapper;
 
     @PostMapping
-    public ResponseEntity<ProductResponseDto> createProduct(@RequestParam(name = "title") String title,
-                                                            @RequestParam(name = "description") String description,
+    public ResponseEntity<ProductResponseDto> createProduct(@RequestParam(name = "title") @NotBlank(message = "Title is mandatory") String title,
+                                                            @RequestParam(name = "description") @NotBlank(message = "Description is mandatory") String description,
                                                             @RequestParam(name = "image") MultipartFile image,
-                                                            @RequestParam(name = "sizes") String sizes,
-                                                            @RequestParam(name = "categoryId") Long categoryId,
-                                                            @RequestParam(name = "discount") Double discount) {
+                                                            @RequestParam(name = "sizes") @NotNull(message = "Sizes can't be null") String sizes,
+                                                            @RequestParam(name = "categoryId") @NotNull(message = "Category can't be null") Long categoryId,
+                                                            @RequestParam(name = "discount", required = false) Double discount) {
 
         ProductRequestDto productRequestDto = ProductRequestDto.builder()
                 .title(title)
@@ -93,25 +80,18 @@ public class ProductController {
     }
 
     @GetMapping("/search/{title}")
-    public ResponseEntity<PaginatedResponseDto<ProductResponseDto>> getAllProductsByTitle(@PathVariable String title,
-                                                                                          @RequestParam(name = "limit", defaultValue = "10") Integer limit,
-                                                                                          @RequestParam(name = "offset", defaultValue = "0") Integer offset) {
-        Page<ProductEntity> products = productService.getProductsByTitle(title, limit, offset);
-
-        return ResponseEntity.ok(PaginatedResponseDto.<ProductResponseDto>builder()
-                .data(productMapper.toProductResponseDtoList(productMapper.toProductList(products.getContent())))
-                .totalElements(products.getTotalElements())
-                .totalPages(products.getTotalPages()).build());
+    public ResponseEntity<List<ProductResponseDto>> getAllProductsByTitle(@PathVariable String title) {
+        return ResponseEntity.ok(productMapper.toProductResponseDtoList(productService.getProductsByTitle(title)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable UUID id,
-                                                            @RequestParam(name = "title") String title,
-                                                            @RequestParam(name = "description") String description,
+                                                            @RequestParam(name = "title") @NotBlank(message = "Title is mandatory") String title,
+                                                            @RequestParam(name = "description") @NotBlank(message = "Description is mandatory") String description,
                                                             @RequestParam(name = "image", required = false) MultipartFile image,
-                                                            @RequestParam(name = "sizes") String sizes,
-                                                            @RequestParam(name = "categoryId") Long categoryId,
-                                                            @RequestParam(name = "discount") Double discount) {
+                                                            @RequestParam(name = "sizes") @NotNull(message = "Sizes can't be null") String sizes,
+                                                            @RequestParam(name = "categoryId") @NotNull(message = "Category can't be null") Long categoryId,
+                                                            @RequestParam(name = "discount") @NotNull(message = "Discount can't be null") Double discount) {
 
         ProductRequestDto productRequestDto = ProductRequestDto.builder()
                 .title(title)

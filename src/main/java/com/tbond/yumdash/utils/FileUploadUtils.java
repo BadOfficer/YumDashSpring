@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 @Component
-public class ImagesUtils {
+public class FileUploadUtils {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -27,6 +27,6 @@ public class ImagesUtils {
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return fileName;
+        return filePath.toString();
     }
 }

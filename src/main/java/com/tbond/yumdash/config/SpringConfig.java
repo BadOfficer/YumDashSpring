@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.sql.DataSource;
 
 @Configuration
-public class SpringConfig implements WebMvcConfigurer {
+public class SpringConfig {
 
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
@@ -26,9 +26,6 @@ public class SpringConfig implements WebMvcConfigurer {
     @Value("${spring.datasource.password}")
     private String password;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
-
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -39,12 +36,6 @@ public class SpringConfig implements WebMvcConfigurer {
         dataSource.setPassword(password);
 
         return dataSource;
-    }
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**")
-                .addResourceLocations("file:" + uploadDir + "\\");
     }
 
     @Bean

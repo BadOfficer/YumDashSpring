@@ -9,13 +9,16 @@ import com.tbond.yumdash.repository.entity.UserEntity;
 import com.tbond.yumdash.service.UserService;
 import com.tbond.yumdash.service.exception.UserNotFoundException;
 import com.tbond.yumdash.service.mappers.UserMapper;
-import com.tbond.yumdash.utils.ImagesUtils;
+import com.tbond.yumdash.utils.FileUploadUtils;
 import jakarta.persistence.PersistenceException;
 import lombok.Data;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,13 +28,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final ImagesUtils imagesUtils;
+    private final FileUploadUtils fileUploadUtils;
 
     @Override
     @Transactional
     public User createUser(UserRequestDto userRequestDto) {
         try {
-            String avatarPath = imagesUtils.saveImage(userRequestDto.getAvatar());
+            String avatarPath = fileUploadUtils.saveImage(userRequestDto.getAvatar());
 
             CartEntity initialCart = CartEntity.builder()
                     .totalPrice(INITIAL_TOTAL_CART_PRICE)
@@ -74,19 +77,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User updateUser(UUID id, UserRequestDto userRequestDto, UserRole userRole) {
-        UserEntity user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id.toString()));
+        UserEntity user = userRepository.findByNaturalId(id).orElseThrow(() -> new UserNotFoundException(id.toString()));
         try {
-            String avatarPath = imagesUtils.saveImage(userRequestDto.getAvatar());
+            String avatarPath = fileUploadUtils.saveImage(userRequestDto.getAvatar());
 
-            if (avatarPath != null) {
-                user.setAvatar(avatarPath);
-            }
-
+            user.setAvatar(Optional.ofNullable(avatarPath).orElse(user.getAvatar()));
             user.setFullName(userRequestDto.getFullName());
             user.setEmail(userRequestDto.getEmail());
             user.setAddress(userRequestDto.getAddress());
             user.setPhone(userRequestDto.getPhone());
-            user.setRole(userRole);
+            user.setRole(Optional.ofNullable(userRole).orElse(user.getRole()));
 
             return userMapper.toUser(userRepository.save(user));
         } catch (Exception e) {
@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public void deleteUser(UUID id) {
         getUserById(id);
 
@@ -104,5 +104,11 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw  new PersistenceException(e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<UserEntity> getAllUsers(Integer offset, Integer limit) {
+        return userRepository.findAll(PageRequest.of(offset, limit));
     }
 }

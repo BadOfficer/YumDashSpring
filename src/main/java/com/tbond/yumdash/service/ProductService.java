@@ -18,7 +18,7 @@ public interface ProductService {
     Product getProductBySlug(String slug);
     Page<ProductEntity> getProductsByCategory(Long categoryId, Integer offset, Integer limit);
     Page<ProductEntity> getProducts(Integer offset, Integer limit);
-    Page<ProductEntity> getProductsByTitle(String title, Integer offset, Integer limit);
+    List<Product> getProductsByTitle(String title);
     Product updateProduct(UUID productId, ProductRequestDto productDto);
     void deleteProduct(UUID productId);
 }

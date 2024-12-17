@@ -1,6 +1,5 @@
 package com.tbond.yumdash.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tbond.yumdash.common.ProductSize;
@@ -14,7 +13,7 @@ import com.tbond.yumdash.service.ProductService;
 import com.tbond.yumdash.service.exception.ProductNotFoundException;
 import com.tbond.yumdash.service.mappers.CategoryMapper;
 import com.tbond.yumdash.service.mappers.ProductMapper;
-import com.tbond.yumdash.utils.ImagesUtils;
+import com.tbond.yumdash.utils.FileUploadUtils;
 import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,9 +21,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.tbond.yumdash.utils.SlugUtils.generateSlug;
 
@@ -36,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final ObjectMapper objectMapper;
-    private final ImagesUtils imagesUtils;
+    private final FileUploadUtils fileUploadUtils;
 
     @Override
     @Transactional
@@ -44,8 +44,9 @@ public class ProductServiceImpl implements ProductService {
         try {
             Category category = categoryRepository.findById(productDto.getCategoryId());
 
-            List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {});
-            String imagePath = imagesUtils.saveImage(productDto.getImage());
+            List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {
+            });
+            String imagePath = fileUploadUtils.saveImage(productDto.getImage());
 
             Product newProduct = Product.builder()
                     .title(productDto.getTitle())
@@ -53,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
                     .productSlug(generateSlug(productDto.getTitle()))
                     .productSizes(sizes)
                     .image(imagePath)
-                    .discount(productDto.getDiscount())
+                    .discount(Optional.ofNullable(productDto.getDiscount()).orElse(0.0))
                     .description(productDto.getDescription())
                     .build();
 
@@ -90,8 +91,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductEntity> getProductsByTitle(String title, Integer offset, Integer limit) {
-        return productRepository.findByTitleContainingIgnoreCase(title, PageRequest.of(offset, limit));
+    public List<Product> getProductsByTitle(String title) {
+        return productMapper.toProductList(productRepository.findByTitleContainingIgnoreCase(title).stream()
+                .limit(10)
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -101,13 +104,10 @@ public class ProductServiceImpl implements ProductService {
             ProductEntity product = productRepository.findByNaturalId(productId)
                     .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
 
-            List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {});
+            List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {
+            });
             Category category = categoryRepository.findById(productDto.getCategoryId());
-            String imagePath = imagesUtils.saveImage(productDto.getImage());
-
-            if (imagePath != null) {
-                product.setImage(imagePath);
-            }
+            String imagePath = fileUploadUtils.saveImage(productDto.getImage());
 
             product.setId(product.getId());
             product.setTitle(productDto.getTitle());
@@ -115,7 +115,8 @@ public class ProductServiceImpl implements ProductService {
             product.setDescription(productDto.getDescription());
             product.setRating(product.getRating());
             product.setProductSizes(sizes);
-            product.setDiscount(productDto.getDiscount());
+            product.setImage(Optional.ofNullable(imagePath).orElse(product.getImage()));
+            product.setDiscount(Optional.ofNullable(productDto.getDiscount()).orElse(product.getDiscount()));
 
             return productMapper.toProduct(productRepository.save(product));
         } catch (Exception e) {

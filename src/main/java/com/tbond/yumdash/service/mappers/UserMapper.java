@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 @Component
 public interface UserMapper {
@@ -15,4 +17,8 @@ public interface UserMapper {
 
     @Mapping(target = "fullName", source = "fullName")
     UserResponseDto toUserResponseDto(User user);
+
+    List<User> toUserList(List<UserEntity> list);
+
+    List<UserResponseDto> toUserResponseDtoList(List<User> list);
 }
