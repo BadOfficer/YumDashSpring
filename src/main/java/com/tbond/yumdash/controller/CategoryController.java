@@ -41,11 +41,6 @@ public class CategoryController {
         return ResponseEntity.ok(categoryMapper.toCategoryResponseDto(categoryService.updateCategory(id, categoryDto)));
     }
 
-    @GetMapping("/name/{name}")
-    public ResponseEntity<CategoryResponseDto> getCategoryByName(@PathVariable String name) {
-        return ResponseEntity.ok(categoryMapper.toCategoryResponseDto(categoryService.getCategoryByName(name)));
-    }
-
     @DeleteMapping("/{id}")
     public void deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
