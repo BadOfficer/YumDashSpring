@@ -27,7 +27,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public Category createCategory(CategoryRequestDto categoryDto) {
         try {
-            System.out.println(categoryDto.getTitle());
             return categoryRepository.save(categoryMapper.toCategory(categoryDto));
         } catch (Exception e) {
             throw new PersistenceException(e.getMessage());
