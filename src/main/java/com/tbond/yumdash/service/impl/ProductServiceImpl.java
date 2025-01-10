@@ -51,7 +51,7 @@ public class ProductServiceImpl implements ProductService {
             Product newProduct = Product.builder()
                     .title(productDto.getTitle())
                     .category(category)
-                    .productSlug(generateSlug(productDto.getTitle()))
+                    .productSlug(generateSlug(productDto.getTitle(), category.getTitle()))
                     .productSizes(sizes)
                     .image(imagePath)
                     .discount(Optional.ofNullable(productDto.getDiscount()).orElse(0.0))

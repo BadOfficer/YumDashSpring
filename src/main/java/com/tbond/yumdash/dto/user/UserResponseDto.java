@@ -9,7 +9,8 @@ import lombok.Data;
 @Builder(toBuilder = true)
 public class UserResponseDto {
     String id;
-    String fullName;
+    String firstName;
+    String lastName;
     String email;
     String avatar;
     String phone;

@@ -3,10 +3,13 @@ package com.tbond.yumdash.service.impl;
 import com.tbond.yumdash.domain.Category;
 import com.tbond.yumdash.dto.category.CategoryRequestDto;
 import com.tbond.yumdash.repository.CategoryRepository;
+import com.tbond.yumdash.repository.entity.ProductEntity;
 import com.tbond.yumdash.service.CategoryService;
+import com.tbond.yumdash.service.ProductService;
 import com.tbond.yumdash.service.mappers.CategoryMapper;
 import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final ProductService productService;
 
 
     @Override
@@ -62,11 +66,18 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void deleteCategory(Long id) {
         getCategoryById(id);
+        Page<ProductEntity> products = productService.getProductsByCategory(id, 10, 0);
 
-        try {
-            categoryRepository.delete(id);
-        } catch (Exception e) {
-            throw new PersistenceException(e.getMessage());
+        if (products.getTotalElements() == 0) {
+            try {
+                categoryRepository.delete(id);
+            } catch (Exception e) {
+                throw new PersistenceException(e.getMessage());
+            }
+        } else {
+            throw new RuntimeException("Cannot delete category with id " + id + " because it is associated with "
+                    + products.getTotalElements() + " products.");
         }
     }
 }
+

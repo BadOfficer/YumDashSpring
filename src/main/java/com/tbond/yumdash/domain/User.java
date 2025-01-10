@@ -9,7 +9,8 @@ import lombok.Data;
 @Builder
 public class User {
     String id;
-    String fullName;
+    String firstName;
+    String lastName;
     String email;
     String avatar;
     String phone;

@@ -8,15 +8,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder(toBuilder = true)
-public class UserRequestDto {
-    @NotBlank(message = "fullName is mandatory")
-    String fullName;
+public class UserUpdateDto {
+    @NotBlank(message = "FirstName is mandatory")
+    String firstName;
 
-    @NotBlank(message = "email is mandatory")
-    String email;
-
-    @NotBlank(message = "password is mandatory")
-    String password;
+    @NotBlank(message = "LastName is mandatory")
+    String lastName;
 
     MultipartFile avatar;
 

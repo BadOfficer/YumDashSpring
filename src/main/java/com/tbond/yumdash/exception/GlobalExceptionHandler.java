@@ -1,5 +1,6 @@
 package com.tbond.yumdash.exception;
 
+import com.tbond.yumdash.service.exception.CartItemNotFound;
 import com.tbond.yumdash.service.exception.CategoryNotFoundException;
 import com.tbond.yumdash.service.exception.ProductNotFoundException;
 import com.tbond.yumdash.service.exception.UserNotFoundException;
@@ -40,6 +41,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problemDetail.setType(URI.create("user-not-found"));
         problemDetail.setTitle("User Not Found");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(CartItemNotFound.class)
+    public ProblemDetail handleCartItemNotFoundException(CartItemNotFound ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problemDetail.setType(URI.create("cart-item-not-found"));
+        problemDetail.setTitle("Cart Item Not Found");
         return problemDetail;
     }
 

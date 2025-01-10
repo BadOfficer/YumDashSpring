@@ -27,7 +27,7 @@ public class OrderEntity {
     @Column(nullable = false, name = "total_price")
     Double totalPrice;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CartItemEntity> cartItems;
 
     @NaturalId

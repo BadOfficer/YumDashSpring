@@ -21,6 +21,8 @@ public class CartItemEntity {
     @JoinColumn(name = "product_id", nullable = false)
     ProductEntity product;
 
+    String productSize;
+
     Double price;
 
     Integer quantity;

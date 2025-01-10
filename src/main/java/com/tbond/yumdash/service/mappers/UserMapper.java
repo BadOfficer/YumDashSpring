@@ -15,7 +15,6 @@ public interface UserMapper {
     @Mapping(target = "id", source = "reference")
     User toUser(UserEntity userEntity);
 
-    @Mapping(target = "fullName", source = "fullName")
     UserResponseDto toUserResponseDto(User user);
 
     List<User> toUserList(List<UserEntity> list);

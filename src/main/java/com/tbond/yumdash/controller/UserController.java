@@ -3,11 +3,13 @@ package com.tbond.yumdash.controller;
 import com.tbond.yumdash.common.Address;
 import com.tbond.yumdash.common.UserRole;
 import com.tbond.yumdash.dto.PaginatedResponseDto;
-import com.tbond.yumdash.dto.user.UserRequestDto;
+import com.tbond.yumdash.dto.user.UserCreateDto;
+import com.tbond.yumdash.dto.user.UserUpdateDto;
 import com.tbond.yumdash.dto.user.UserResponseDto;
 import com.tbond.yumdash.repository.entity.UserEntity;
 import com.tbond.yumdash.service.UserService;
 import com.tbond.yumdash.service.mappers.UserMapper;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -28,22 +30,8 @@ public class UserController {
     private final UserMapper userMapper;
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestParam @NotBlank(message = "Name is mandatory") String fullName,
-                                                      @RequestParam @NotNull(message = "Password can't be null") String password,
-                                                      @RequestParam @NotBlank(message = "Email is mandatory") String email,
-                                                      @RequestParam(required = false) MultipartFile avatar,
-                                                      @RequestParam(required = false) String phone,
-                                                      @RequestParam(required = false) Address address) {
-        UserRequestDto userRequestDto = UserRequestDto.builder()
-                .fullName(fullName)
-                .password(password)
-                .email(email)
-                .address(address)
-                .phone(phone)
-                .avatar(avatar)
-                .build();
-
-        return ResponseEntity.ok(userMapper.toUserResponseDto(userService.createUser(userRequestDto)));
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody @Valid UserCreateDto userCreateDto) {
+        return ResponseEntity.ok(userMapper.toUserResponseDto(userService.createUser(userCreateDto)));
     }
 
     @GetMapping("/{id}")
@@ -57,22 +45,22 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@RequestParam @NotBlank(message = "Name is mandatory") String fullName,
-                                                      @RequestParam(required = false) @NotBlank(message = "Email is mandatory") String email,
+    public ResponseEntity<UserResponseDto> updateUser(@RequestParam @NotBlank(message = "FirstName is mandatory") String firstName,
+                                                      @RequestParam @NotBlank(message = "LastName is mandatory") String lastName,
                                                       @RequestParam(required = false) MultipartFile avatar,
                                                       @RequestParam(required = false) String phone,
-                                                      @RequestParam(required = false) Address address,
+                                                      @ModelAttribute Address address,
                                                       @RequestParam(required = false) UserRole role,
                                                       @PathVariable UUID id) {
-        UserRequestDto userRequestDto = UserRequestDto.builder()
-                .fullName(fullName)
-                .email(email)
+        UserUpdateDto userUpdateDto = UserUpdateDto.builder()
+                .firstName(firstName)
+                .lastName(lastName)
                 .address(address)
                 .phone(phone)
                 .avatar(avatar)
                 .build();
 
-        return ResponseEntity.ok(userMapper.toUserResponseDto(userService.updateUser(id, userRequestDto, role)));
+        return ResponseEntity.ok(userMapper.toUserResponseDto(userService.updateUser(id, userUpdateDto, role)));
     }
 
     @GetMapping("/all")

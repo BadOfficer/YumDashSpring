@@ -2,7 +2,8 @@ package com.tbond.yumdash.service.impl;
 
 import com.tbond.yumdash.common.UserRole;
 import com.tbond.yumdash.domain.User;
-import com.tbond.yumdash.dto.user.UserRequestDto;
+import com.tbond.yumdash.dto.user.UserCreateDto;
+import com.tbond.yumdash.dto.user.UserUpdateDto;
 import com.tbond.yumdash.repository.UserRepository;
 import com.tbond.yumdash.repository.entity.CartEntity;
 import com.tbond.yumdash.repository.entity.UserEntity;
@@ -32,23 +33,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User createUser(UserRequestDto userRequestDto) {
+    public User createUser(UserCreateDto userCreateDto) {
         try {
-            String avatarPath = fileUploadUtils.saveImage(userRequestDto.getAvatar());
-
             CartEntity initialCart = CartEntity.builder()
                     .totalPrice(INITIAL_TOTAL_CART_PRICE)
                     .items(new ArrayList<>())
                     .build();
 
             UserEntity newUser = UserEntity.builder()
-                    .fullName(userRequestDto.getFullName())
-                    .email(userRequestDto.getEmail())
-                    .address(userRequestDto.getAddress())
-                    .phone(userRequestDto.getPhone())
+                    .firstName(userCreateDto.getFirstName())
+                    .lastName(userCreateDto.getLastName())
+                    .email(userCreateDto.getEmail())
                     .role(UserRole.CUSTOMER)
-                    .password(userRequestDto.getPassword())
-                    .avatar(avatarPath)
+                    .password(userCreateDto.getPassword())
                     .reference(UUID.randomUUID())
                     .cart(initialCart)
                     .build();
@@ -76,16 +73,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateUser(UUID id, UserRequestDto userRequestDto, UserRole userRole) {
+    public User updateUser(UUID id, UserUpdateDto userUpdateDto, UserRole userRole) {
         UserEntity user = userRepository.findByNaturalId(id).orElseThrow(() -> new UserNotFoundException(id.toString()));
         try {
-            String avatarPath = fileUploadUtils.saveImage(userRequestDto.getAvatar());
+            String avatarPath = fileUploadUtils.saveImage(userUpdateDto.getAvatar());
 
             user.setAvatar(Optional.ofNullable(avatarPath).orElse(user.getAvatar()));
-            user.setFullName(userRequestDto.getFullName());
-            user.setEmail(userRequestDto.getEmail());
-            user.setAddress(userRequestDto.getAddress());
-            user.setPhone(userRequestDto.getPhone());
+            user.setFirstName(userUpdateDto.getFirstName());
+            user.setLastName(userUpdateDto.getLastName());
+            user.setAddress(userUpdateDto.getAddress());
+            user.setPhone(userUpdateDto.getPhone());
             user.setRole(Optional.ofNullable(userRole).orElse(user.getRole()));
 
             return userMapper.toUser(userRepository.save(user));
