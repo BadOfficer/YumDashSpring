@@ -1,14 +1,12 @@
 package com.tbond.yumdash.dto.product;
 
-import com.tbond.yumdash.common.ProductSize;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -31,5 +29,6 @@ public class ProductRequestDto {
     Long categoryId;
 
     @NotNull(message = "Discount is mandatory")
+    @DecimalMax(value = "100.0", message = "Discount must be at most 100 percentages")
     Double discount;
 }

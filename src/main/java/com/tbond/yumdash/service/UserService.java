@@ -11,9 +11,14 @@ import java.util.UUID;
 
 public interface UserService {
     User createUser(UserCreateDto userCreateDto);
+
     User getUserByEmail(String email);
+
     User getUserById(UUID id);
+
     User updateUser(UUID id, UserUpdateDto userUpdateDto, UserRole userRole);
+
     void deleteUser(UUID id);
+
     Page<UserEntity> getAllUsers(Integer offset, Integer limit);
 }

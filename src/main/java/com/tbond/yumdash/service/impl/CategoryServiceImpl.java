@@ -7,17 +7,14 @@ import com.tbond.yumdash.repository.ProductRepository;
 import com.tbond.yumdash.repository.entity.CategoryEntity;
 import com.tbond.yumdash.repository.entity.ProductEntity;
 import com.tbond.yumdash.service.CategoryService;
-import com.tbond.yumdash.service.ProductService;
 import com.tbond.yumdash.service.exception.CategoryNotFoundException;
 import com.tbond.yumdash.service.mappers.CategoryMapper;
 import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -73,14 +70,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void deleteCategory(Long id) {
         CategoryEntity category = categoryRepository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id.toString()));
-        List<ProductEntity> products = productRepository.findAll()
-                .stream()
-                .filter(product -> product.getCategory().getId().equals(id))
-                .toList();
+        List<ProductEntity> products = productRepository.findByCategoryId(category.getId());
 
         try {
             for (ProductEntity productEntity : products) {
-                System.out.println(productEntity.getId());
                 productEntity.setCategory(null);
                 productRepository.save(productEntity);
             }

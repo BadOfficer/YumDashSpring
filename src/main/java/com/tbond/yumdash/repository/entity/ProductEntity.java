@@ -49,6 +49,6 @@ public class ProductEntity {
     List<ProductSize> productSizes;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id")
     CategoryEntity category;
 }

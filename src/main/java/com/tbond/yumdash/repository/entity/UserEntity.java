@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.NaturalId;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -49,6 +50,9 @@ public class UserEntity {
     UserRole role;
 
     Address address;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<OrderEntity> orders;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "cart_id", referencedColumnName = "id")

@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
             return userMapper.toUser(savedUser);
         } catch (Exception e) {
-            throw  new PersistenceException(e.getMessage());
+            throw new PersistenceException(e.getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
 
             return userMapper.toUser(userRepository.save(user));
         } catch (Exception e) {
-            throw  new PersistenceException(e.getMessage());
+            throw new PersistenceException(e.getMessage());
         }
     }
 
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
         try {
             userRepository.deleteByNaturalId(id);
         } catch (Exception e) {
-            throw  new PersistenceException(e.getMessage());
+            throw new PersistenceException(e.getMessage());
         }
     }
 

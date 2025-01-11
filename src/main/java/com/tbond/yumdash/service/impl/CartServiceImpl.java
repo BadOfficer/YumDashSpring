@@ -56,7 +56,7 @@ public class CartServiceImpl implements CartService {
                     .build();
 
             cartItem.getCart().getItems().add(cartItem);
-            cart.setTotalPrice(cart.getTotalPrice() + calculatedPrice);
+            cart.setTotalPrice((double) Math.round((cart.getTotalPrice() + calculatedPrice) * 100) / 100);
 
             try {
                 return cartMapper.toCart(cartRepository.save(cart));
@@ -101,7 +101,7 @@ public class CartServiceImpl implements CartService {
         CartItemEntity cartItem = cart.getItems().stream().filter(item -> item.getId().equals(cartItemId))
                 .findFirst().orElseThrow(() -> new CartItemNotFound(cartItemId.toString()));
 
-        cart.setTotalPrice(cart.getTotalPrice() - cartItem.getPrice());
+        cart.setTotalPrice((double) Math.round((cart.getTotalPrice() - cartItem.getPrice()) * 100) / 100);
 
         cart.getItems().remove(cartItem);
 
@@ -134,7 +134,7 @@ public class CartServiceImpl implements CartService {
         cartItem.setQuantity(quantity);
         cartItem.setPrice(calculatedPrice);
 
-        cart.setTotalPrice(cart.getTotalPrice() + calculatedPrice);
+        cart.setTotalPrice((double) Math.round((cart.getTotalPrice() + calculatedPrice) * 100) / 100);
 
         try {
             return cartMapper.toCart(cartRepository.save(cart));

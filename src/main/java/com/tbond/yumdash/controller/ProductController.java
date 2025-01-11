@@ -6,6 +6,7 @@ import com.tbond.yumdash.dto.product.ProductResponseDto;
 import com.tbond.yumdash.repository.entity.ProductEntity;
 import com.tbond.yumdash.service.ProductService;
 import com.tbond.yumdash.service.mappers.ProductMapper;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -31,7 +33,8 @@ public class ProductController {
                                                             @RequestParam(name = "image") MultipartFile image,
                                                             @RequestParam(name = "sizes") @NotNull(message = "Sizes can't be null") String sizes,
                                                             @RequestParam(name = "categoryId") @NotNull(message = "Category can't be null") Long categoryId,
-                                                            @RequestParam(name = "discount", required = false) Double discount) {
+                                                            @RequestParam(name = "discount", required = false)
+                                                            @DecimalMax(value = "100.0", message = "Discount must be at most 100") Double discount) {
 
         ProductRequestDto productRequestDto = ProductRequestDto.builder()
                 .title(title)

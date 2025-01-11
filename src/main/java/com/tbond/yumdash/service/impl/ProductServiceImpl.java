@@ -3,13 +3,14 @@ package com.tbond.yumdash.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tbond.yumdash.common.ProductSize;
-import com.tbond.yumdash.domain.Category;
 import com.tbond.yumdash.domain.Product;
 import com.tbond.yumdash.dto.product.ProductRequestDto;
 import com.tbond.yumdash.repository.CategoryRepository;
 import com.tbond.yumdash.repository.ProductRepository;
+import com.tbond.yumdash.repository.entity.CategoryEntity;
 import com.tbond.yumdash.repository.entity.ProductEntity;
 import com.tbond.yumdash.service.ProductService;
+import com.tbond.yumdash.service.exception.CategoryNotFoundException;
 import com.tbond.yumdash.service.exception.ProductNotFoundException;
 import com.tbond.yumdash.service.mappers.CategoryMapper;
 import com.tbond.yumdash.service.mappers.ProductMapper;
@@ -42,7 +43,8 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public Product createProduct(ProductRequestDto productDto) {
         try {
-            Category category = categoryRepository.findById(productDto.getCategoryId());
+            CategoryEntity category = categoryRepository.findById(productDto.getCategoryId())
+                    .orElseThrow(() -> new CategoryNotFoundException(productDto.getCategoryId().toString()));
 
             List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {
             });
@@ -50,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
 
             Product newProduct = Product.builder()
                     .title(productDto.getTitle())
-                    .category(category)
+                    .category(categoryMapper.toCategory(category))
                     .productSlug(generateSlug(productDto.getTitle(), category.getTitle()))
                     .productSizes(sizes)
                     .image(imagePath)
@@ -80,7 +82,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProductEntity> getProductsByCategory(Long categoryId, Integer limit, Integer offset) {
-        return productRepository.findByCategory(categoryId, PageRequest.of(offset, limit));
+        return productRepository.findByCategoryId(categoryId, PageRequest.of(offset, limit));
     }
 
     @Override
@@ -106,12 +108,14 @@ public class ProductServiceImpl implements ProductService {
 
             List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {
             });
-            Category category = categoryRepository.findById(productDto.getCategoryId());
+            CategoryEntity category = categoryRepository.findById(productDto.getCategoryId())
+                    .orElseThrow(() -> new CategoryNotFoundException(productDto.getCategoryId().toString()));
+
             String imagePath = fileUploadUtils.saveImage(productDto.getImage());
 
             product.setId(product.getId());
             product.setTitle(productDto.getTitle());
-            product.setCategory(categoryMapper.toCategoryEntity(category));
+            product.setCategory(category);
             product.setDescription(productDto.getDescription());
             product.setRating(product.getRating());
             product.setProductSizes(sizes);

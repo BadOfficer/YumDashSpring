@@ -34,9 +34,13 @@ public class OrderEntity {
     @Column(nullable = false, name = "order_reference", unique = true)
     UUID reference;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     UserEntity user;
+
+    @OneToOne
+    @JoinColumn(name = "courier_id")
+    UserEntity courier;
 
     @Column(nullable = false, name = "created_at")
     Long createdAt;

@@ -3,7 +3,6 @@ package com.tbond.yumdash.dto.category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Value;
 
 @Data
 public class CategoryRequestDto {
