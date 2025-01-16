@@ -8,6 +8,7 @@ import com.tbond.yumdash.repository.UserRepository;
 import com.tbond.yumdash.repository.entity.CartEntity;
 import com.tbond.yumdash.repository.entity.UserEntity;
 import com.tbond.yumdash.service.UserService;
+import com.tbond.yumdash.service.exception.UserExistException;
 import com.tbond.yumdash.service.exception.UserNotFoundException;
 import com.tbond.yumdash.service.mappers.UserMapper;
 import com.tbond.yumdash.utils.FileUploadUtils;
@@ -15,6 +16,7 @@ import jakarta.persistence.PersistenceException;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +32,18 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final FileUploadUtils fileUploadUtils;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public User createUser(UserCreateDto userCreateDto) {
         try {
+            Optional<UserEntity> existUser = userRepository.findByEmail(userCreateDto.getEmail());
+
+            if (existUser.isPresent()) {
+                throw new UserExistException(userCreateDto.getEmail());
+            }
+
             CartEntity initialCart = CartEntity.builder()
                     .totalPrice(INITIAL_TOTAL_CART_PRICE)
                     .items(new ArrayList<>())
@@ -45,9 +54,10 @@ public class UserServiceImpl implements UserService {
                     .lastName(userCreateDto.getLastName())
                     .email(userCreateDto.getEmail())
                     .role(UserRole.CUSTOMER)
-                    .password(userCreateDto.getPassword())
+                    .password(passwordEncoder.encode(userCreateDto.getPassword()))
                     .reference(UUID.randomUUID())
                     .cart(initialCart)
+                    .isEnabled(false)
                     .build();
 
             UserEntity savedUser = userRepository.save(newUser);
@@ -61,7 +71,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public User getUserByEmail(String email) {
-        return userMapper.toUser(userRepository.findByEmail(email));
+        UserEntity foundedUser = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+
+        return userMapper.toUser(foundedUser);
     }
 
     @Override
@@ -93,11 +105,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(UUID id) {
+    public String deleteUser(UUID id) {
         getUserById(id);
 
         try {
             userRepository.deleteByNaturalId(id);
+            return String.format("User %s deleted successfully", id);
         } catch (Exception e) {
             throw new PersistenceException(e.getMessage());
         }

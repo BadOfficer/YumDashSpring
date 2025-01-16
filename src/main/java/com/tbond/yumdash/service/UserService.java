@@ -18,7 +18,7 @@ public interface UserService {
 
     User updateUser(UUID id, UserUpdateDto userUpdateDto, UserRole userRole);
 
-    void deleteUser(UUID id);
+    String deleteUser(UUID id);
 
     Page<UserEntity> getAllUsers(Integer offset, Integer limit);
 }

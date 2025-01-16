@@ -51,6 +51,9 @@ public class UserEntity {
 
     Address address;
 
+    @Column(name = "is_enabled", nullable = false)
+    Boolean isEnabled;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrderEntity> orders;
 

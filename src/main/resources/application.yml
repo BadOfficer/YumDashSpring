@@ -2,6 +2,18 @@ spring:
   application:
     name: YumDash
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   datasource:
     url: jdbc:postgresql://localhost:5432/yum-dash
     username: postgres
@@ -10,7 +22,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
 
 file:
   upload-dir: D:\\YumDashImages
@@ -21,3 +33,4 @@ springdoc:
 
   swagger-ui:
     path: /swagger-ui.html
+
