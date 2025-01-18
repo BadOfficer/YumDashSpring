@@ -1,6 +1,8 @@
 package com.tbond.yumdash.controller;
 
 import com.tbond.yumdash.domain.User;
+import com.tbond.yumdash.dto.auth.AuthRequestDto;
+import com.tbond.yumdash.dto.auth.AuthResponseDto;
 import com.tbond.yumdash.dto.user.UserCreateDto;
 import com.tbond.yumdash.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,5 +27,10 @@ public class AuthController {
     public ResponseEntity<String> validateEmail(@RequestParam String token) {
         String verificationMessage = authService.verifyRegistration(token);
         return ResponseEntity.ok(verificationMessage);
+    }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<AuthResponseDto> login(@RequestBody AuthRequestDto dto) {
+        return ResponseEntity.ok(authService.login(dto));
     }
 }
