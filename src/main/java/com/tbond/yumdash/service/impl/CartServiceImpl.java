@@ -10,20 +10,20 @@ import com.tbond.yumdash.repository.entity.CartItemEntity;
 import com.tbond.yumdash.repository.entity.ProductEntity;
 import com.tbond.yumdash.repository.entity.UserEntity;
 import com.tbond.yumdash.service.CartService;
-import com.tbond.yumdash.service.exception.CartItemNotFound;
-import com.tbond.yumdash.service.exception.ProductNotFoundException;
-import com.tbond.yumdash.service.exception.UserNotFoundException;
+import com.tbond.yumdash.service.exception.*;
 import com.tbond.yumdash.service.mappers.CartMapper;
 import jakarta.persistence.PersistenceException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
+    private final static double INITIAL_CART_TOTAL_PRICE = 0.0;
+
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
@@ -32,18 +32,22 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public Cart addItemToCart(UUID userId, UUID productId, Integer quantity, String productSize) {
-        UserEntity user = userRepository.findByNaturalId(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
-        ProductEntity product = productRepository.findByNaturalId(productId).orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+        UserEntity user = userRepository.findByNaturalId(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId.toString()));
+        ProductEntity product = productRepository.findByNaturalId(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+
         CartEntity cart = user.getCart();
 
         boolean existingItem = cart.getItems().stream()
-                .anyMatch(item ->
-                        item.getProduct().getReference().equals(product.getReference()) && item.getProductSize().equals(productSize));
+                .anyMatch(item -> item.getProduct().getReference().equals(product.getReference()) &&
+                        item.getProductSize().equals(productSize)
+                );
 
         if (!existingItem) {
             Double price = product.getProductSizes().stream().filter(size -> size.getSize().equals(productSize))
                     .map(ProductSize::getPrice).findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid product size: " + productSize));
+                    .orElseThrow(() -> new ProductInvalidSizeException(String.format("Product size %s is invalid", productSize)));
 
             Double calculatedPrice = getCalculatedPrice(price, quantity, product.getDiscount());
 
@@ -64,7 +68,7 @@ public class CartServiceImpl implements CartService {
                 throw new PersistenceException(e);
             }
         } else {
-            throw new RuntimeException("Item already in cart");
+            throw new ProductInCartException("Item already in cart");
         }
     }
 
@@ -73,7 +77,7 @@ public class CartServiceImpl implements CartService {
     public Cart clearCart(UUID userId) {
         UserEntity user = userRepository.findByNaturalId(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
         CartEntity cart = user.getCart();
-        cart.setTotalPrice(0.0);
+        cart.setTotalPrice(INITIAL_CART_TOTAL_PRICE);
         cart.getItems().clear();
 
         try {
@@ -86,7 +90,9 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional(readOnly = true)
     public Cart getCartByUserId(UUID userId) {
-        UserEntity user = userRepository.findByNaturalId(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
+        UserEntity user = userRepository.findByNaturalId(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId.toString()));
+
         CartEntity cart = user.getCart();
 
         return cartMapper.toCart(cart);

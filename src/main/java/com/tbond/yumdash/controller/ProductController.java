@@ -89,12 +89,12 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable UUID id,
-                                                            @RequestParam(name = "title") @NotBlank(message = "Title is mandatory") String title,
-                                                            @RequestParam(name = "description") @NotBlank(message = "Description is mandatory") String description,
+                                                            @RequestParam(name = "title", required = false) String title,
+                                                            @RequestParam(name = "description", required = false) String description,
                                                             @RequestParam(name = "image", required = false) MultipartFile image,
-                                                            @RequestParam(name = "sizes") @NotNull(message = "Sizes can't be null") String sizes,
-                                                            @RequestParam(name = "categoryId") @NotNull(message = "Category can't be null") Long categoryId,
-                                                            @RequestParam(name = "discount") @NotNull(message = "Discount can't be null") Double discount) {
+                                                            @RequestParam(name = "sizes", required = false) String sizes,
+                                                            @RequestParam(name = "categoryId", required = false) Long categoryId,
+                                                            @RequestParam(name = "discount", required = false) Double discount) {
 
         ProductRequestDto productRequestDto = ProductRequestDto.builder()
                 .title(title)
@@ -109,7 +109,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable UUID id) {
-        productService.deleteProduct(id);
+    public ResponseEntity<String> deleteProduct(@PathVariable UUID id) {
+        return ResponseEntity.ok(productService.deleteProduct(id));
     }
 }

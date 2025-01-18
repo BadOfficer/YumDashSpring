@@ -14,7 +14,7 @@ import com.tbond.yumdash.service.AuthService;
 import com.tbond.yumdash.service.UserService;
 import com.tbond.yumdash.service.VerificationTokenService;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final UserRepository userRepository;
@@ -48,6 +48,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public String verifyRegistration(String token) {
         try {
             VerificationTokenEntity verificationToken = verificationTokenService.validateVerificationToken(token);
@@ -62,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthResponseDto login(AuthRequestDto dto) {
         UserDetails userData = userDataService.loadUserByUsername(dto.getEmail());
         authenticationManager.authenticate(

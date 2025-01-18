@@ -16,7 +16,7 @@ import com.tbond.yumdash.service.mappers.CategoryMapper;
 import com.tbond.yumdash.service.mappers.ProductMapper;
 import com.tbond.yumdash.utils.FileUploadUtils;
 import jakarta.persistence.PersistenceException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -25,12 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.tbond.yumdash.utils.SlugUtils.generateSlug;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final ProductRepository productRepository;
@@ -96,7 +95,7 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getProductsByTitle(String title) {
         return productMapper.toProductList(productRepository.findByTitleContainingIgnoreCase(title).stream()
                 .limit(10)
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     @Override
@@ -108,17 +107,18 @@ public class ProductServiceImpl implements ProductService {
 
             List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {
             });
-            CategoryEntity category = categoryRepository.findById(productDto.getCategoryId())
-                    .orElseThrow(() -> new CategoryNotFoundException(productDto.getCategoryId().toString()));
+
+            CategoryEntity category = categoryRepository.findById(productDto.getCategoryId()).orElse(null);
 
             String imagePath = fileUploadUtils.saveImage(productDto.getImage());
 
             product.setId(product.getId());
-            product.setTitle(productDto.getTitle());
-            product.setCategory(category);
-            product.setDescription(productDto.getDescription());
+            product.setTitle(Optional.ofNullable(productDto.getTitle()).orElse(product.getTitle()));
+            product.setTitle(Optional.ofNullable(productDto.getTitle()).orElse(product.getTitle()));
+            product.setCategory(Optional.ofNullable(category).orElse(product.getCategory()));
+            product.setDescription(Optional.ofNullable(productDto.getDescription()).orElse(product.getDescription()));
             product.setRating(product.getRating());
-            product.setProductSizes(sizes);
+            product.setProductSizes(Optional.ofNullable(sizes).orElse(product.getProductSizes()));
             product.setImage(Optional.ofNullable(imagePath).orElse(product.getImage()));
             product.setDiscount(Optional.ofNullable(productDto.getDiscount()).orElse(product.getDiscount()));
 
@@ -130,11 +130,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void deleteProduct(UUID productId) {
-        getProductById(productId);
-
+    public String deleteProduct(UUID productId) {
+        ProductEntity product = productRepository.findByNaturalId(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
         try {
             productRepository.deleteByNaturalId(productId);
+            return String.format("Product %s deleted successfully", product.getTitle());
         } catch (Exception e) {
             throw new PersistenceException(e);
         }

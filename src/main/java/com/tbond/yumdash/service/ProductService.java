@@ -23,5 +23,5 @@ public interface ProductService {
 
     Product updateProduct(UUID productId, ProductRequestDto productDto);
 
-    void deleteProduct(UUID productId);
+    String deleteProduct(UUID productId);
 }

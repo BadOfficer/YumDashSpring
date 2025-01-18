@@ -13,7 +13,7 @@ import com.tbond.yumdash.service.exception.UserNotFoundException;
 import com.tbond.yumdash.service.mappers.UserMapper;
 import com.tbond.yumdash.utils.FileUploadUtils;
 import jakarta.persistence.PersistenceException;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@Data
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private static final Double INITIAL_TOTAL_CART_PRICE = 0.0;
 
@@ -71,7 +71,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public User getUserByEmail(String email) {
-        UserEntity foundedUser = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+        UserEntity foundedUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         return userMapper.toUser(foundedUser);
     }
@@ -91,10 +92,10 @@ public class UserServiceImpl implements UserService {
             String avatarPath = fileUploadUtils.saveImage(userUpdateDto.getAvatar());
 
             user.setAvatar(Optional.ofNullable(avatarPath).orElse(user.getAvatar()));
-            user.setFirstName(userUpdateDto.getFirstName());
-            user.setLastName(userUpdateDto.getLastName());
-            user.setAddress(userUpdateDto.getAddress());
-            user.setPhone(userUpdateDto.getPhone());
+            user.setFirstName(Optional.ofNullable(userUpdateDto.getFirstName()).orElse(user.getFirstName()));
+            user.setLastName(Optional.ofNullable(userUpdateDto.getLastName()).orElse(user.getLastName()));
+            user.setAddress(Optional.ofNullable(userUpdateDto.getAddress()).orElse(user.getAddress()));
+            user.setPhone(Optional.ofNullable(userUpdateDto.getPhone()).orElse(user.getPhone()));
             user.setRole(Optional.ofNullable(userRole).orElse(user.getRole()));
 
             return userMapper.toUser(userRepository.save(user));
@@ -106,11 +107,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public String deleteUser(UUID id) {
-        getUserById(id);
+        UserEntity user = userRepository.findByNaturalId(id)
+                .orElseThrow(() -> new UserNotFoundException(id.toString()));
 
         try {
             userRepository.deleteByNaturalId(id);
-            return String.format("User %s deleted successfully", id);
+            return String.format("User %s deleted successfully", user.getEmail());
         } catch (Exception e) {
             throw new PersistenceException(e.getMessage());
         }

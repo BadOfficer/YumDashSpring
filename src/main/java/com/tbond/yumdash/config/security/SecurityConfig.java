@@ -26,12 +26,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/v1/user/**").authenticated()
+                        .requestMatchers("/api/v1/users/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "api/v1/products/**").permitAll()
                         .requestMatchers("/api/v1/products/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/v1/carts/**").authenticated())
+                        .requestMatchers("/api/v1/carts/**").hasAnyAuthority("CUSTOMER", "ADMIN"))
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

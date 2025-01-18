@@ -7,26 +7,32 @@ import com.tbond.yumdash.repository.ProductRepository;
 import com.tbond.yumdash.repository.entity.CategoryEntity;
 import com.tbond.yumdash.repository.entity.ProductEntity;
 import com.tbond.yumdash.service.CategoryService;
+import com.tbond.yumdash.service.exception.CategoryExistException;
 import com.tbond.yumdash.service.exception.CategoryNotFoundException;
 import com.tbond.yumdash.service.mappers.CategoryMapper;
 import jakarta.persistence.PersistenceException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final ProductRepository productRepository;
 
-
     @Override
     @Transactional
     public Category createCategory(CategoryRequestDto categoryDto) {
+        CategoryEntity category = categoryRepository.findByTitle(categoryDto.getTitle()).orElse(null);
+
+        if (category != null) {
+            throw new CategoryExistException(String.format("Category %s is exist", categoryDto.getTitle()));
+        }
+
         CategoryEntity categoryEntity = CategoryEntity.builder()
                 .title(categoryDto.getTitle())
                 .build();
@@ -61,7 +67,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public Category getCategoryById(Long id) {
-        CategoryEntity category = categoryRepository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id.toString()));
+        CategoryEntity category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException(id.toString()));
 
         return categoryMapper.toCategory(category);
     }
@@ -69,7 +76,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteCategory(Long id) {
-        CategoryEntity category = categoryRepository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id.toString()));
+        CategoryEntity category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException(id.toString()));
+
         List<ProductEntity> products = productRepository.findByCategoryId(category.getId());
 
         try {
