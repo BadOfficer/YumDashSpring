@@ -57,6 +57,46 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(CategoryExistException.class)
+    public ProblemDetail handleCategoryExistException(CategoryExistException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problemDetail.setType(URI.create("category-exist"));
+        problemDetail.setTitle("Category Exist");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ProductInCartException.class)
+    public ProblemDetail handleProductInCartException(ProductInCartException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problemDetail.setType(URI.create("product-in-cart"));
+        problemDetail.setTitle("Product In Cart");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ProductInvalidSizeException.class)
+    public ProblemDetail handleProductInvalidSizeException(ProductInvalidSizeException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problemDetail.setType(URI.create("product-invalid-size"));
+        problemDetail.setTitle("Product Invalid Size");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(UserExistException.class)
+    public ProblemDetail handleUserExistException(UserExistException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problemDetail.setType(URI.create("user-exist"));
+        problemDetail.setTitle("User Exist");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(VerificationTokenValidationException.class)
+    public ProblemDetail handleVerificationTokenValidationException(VerificationTokenValidationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        problemDetail.setType(URI.create("verification-token-validation"));
+        problemDetail.setTitle("Verification Token Validation");
+        return problemDetail;
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();

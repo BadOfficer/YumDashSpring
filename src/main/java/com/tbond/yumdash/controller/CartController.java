@@ -1,10 +1,13 @@
 package com.tbond.yumdash.controller;
 
+import com.tbond.yumdash.domain.User;
 import com.tbond.yumdash.dto.cart.CartResponseDto;
 import com.tbond.yumdash.service.CartService;
+import com.tbond.yumdash.service.UserService;
 import com.tbond.yumdash.service.mappers.CartMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -15,35 +18,52 @@ import java.util.UUID;
 public class CartController {
     private final CartService cartService;
     private final CartMapper cartMapper;
+    private final UserService userService;
 
-    @PutMapping("/add-to-cart/{userId}")
-    public ResponseEntity<CartResponseDto> addItemToCart(@PathVariable UUID userId,
-                                                         @RequestParam UUID productId,
+    @PutMapping("/add-to-cart")
+    public ResponseEntity<CartResponseDto> addItemToCart(@RequestParam UUID productId,
                                                          @RequestParam int quantity,
-                                                         @RequestParam String productSize) {
+                                                         @RequestParam String productSize,
+                                                         Authentication authentication) {
+        UUID userId = getUserId(authentication);
+
         return ResponseEntity.ok(cartMapper.toCartResponseDto(cartService.addItemToCart(userId, productId, quantity, productSize)));
     }
 
-    @PutMapping("/clear-cart/{userId}")
-    public ResponseEntity<CartResponseDto> clearCart(@PathVariable UUID userId) {
+    @PutMapping("/clear-cart")
+    public ResponseEntity<CartResponseDto> clearCart(Authentication authentication) {
+        UUID userId = getUserId(authentication);
+
         return ResponseEntity.ok(cartMapper.toCartResponseDto(cartService.clearCart(userId)));
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<CartResponseDto> getCartByUserId(@PathVariable UUID userId) {
+    @GetMapping
+    public ResponseEntity<CartResponseDto> getCartByUserId(Authentication authentication) {
+        UUID userId = getUserId(authentication);
+
         return ResponseEntity.ok(cartMapper.toCartResponseDto(cartService.getCartByUserId(userId)));
     }
 
-    @PutMapping("/remove-from-cart/{userId}")
-    public ResponseEntity<CartResponseDto> removeItemFromCart(@PathVariable UUID userId,
-                                                              @RequestParam long cartItemId) {
+    @PutMapping("/remove-from-cart")
+    public ResponseEntity<CartResponseDto> removeItemFromCart(@RequestParam long cartItemId,
+                                                              Authentication authentication) {
+        UUID userId = getUserId(authentication);
+
         return ResponseEntity.ok(cartMapper.toCartResponseDto(cartService.removeItemFromCart(userId, cartItemId)));
     }
 
-    @PutMapping("/update-quantity/{userId}")
-    public ResponseEntity<CartResponseDto> updateCartItemQuantity(@PathVariable UUID userId,
-                                                                  @RequestParam long cartItemId,
-                                                                  @RequestParam int quantity) {
+    @PutMapping("/update-quantity")
+    public ResponseEntity<CartResponseDto> updateCartItemQuantity(@RequestParam long cartItemId,
+                                                                  @RequestParam int quantity,
+                                                                  Authentication authentication) {
+        UUID userId = getUserId(authentication);
+
         return ResponseEntity.ok(cartMapper.toCartResponseDto(cartService.updateCartItemQuantity(userId, cartItemId, quantity)));
+    }
+
+    private UUID getUserId(Authentication authentication) {
+        User user = userService.getUserByEmail(authentication.getName());
+
+        return UUID.fromString(user.getId());
     }
 }
