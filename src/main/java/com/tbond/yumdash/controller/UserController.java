@@ -44,8 +44,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@RequestParam @NotBlank(message = "FirstName is mandatory") String firstName,
-                                                      @RequestParam @NotBlank(message = "LastName is mandatory") String lastName,
+    public ResponseEntity<UserResponseDto> updateUser(@RequestParam(required = false) String firstName,
+                                                      @RequestParam(required = false) String lastName,
                                                       @RequestParam(required = false) MultipartFile avatar,
                                                       @RequestParam(required = false) String phone,
                                                       @ModelAttribute Address address,
