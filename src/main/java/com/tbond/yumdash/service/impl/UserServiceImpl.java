@@ -3,11 +3,9 @@ package com.tbond.yumdash.service.impl;
 import com.tbond.yumdash.common.UserRole;
 import com.tbond.yumdash.domain.User;
 import com.tbond.yumdash.dto.user.UserCreateDto;
-import com.tbond.yumdash.dto.user.UserUpdateDto;
 import com.tbond.yumdash.repository.UserRepository;
 import com.tbond.yumdash.repository.entity.CartEntity;
 import com.tbond.yumdash.repository.entity.UserEntity;
-import com.tbond.yumdash.service.FileService;
 import com.tbond.yumdash.service.UserService;
 import com.tbond.yumdash.service.exception.UserExistException;
 import com.tbond.yumdash.service.exception.UserNotFoundException;
@@ -31,7 +29,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final FileService fileService;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -86,20 +83,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateUser(UUID id, UserUpdateDto userUpdateDto, UserRole userRole) {
-        UserEntity user = userRepository.findByNaturalId(id).orElseThrow(() -> new UserNotFoundException(id.toString()));
-        try {
-            user.setAvatar(Optional.ofNullable(fileService.uploadImage(userUpdateDto.getAvatar())).orElse(user.getAvatar()));
-            user.setFirstName(Optional.ofNullable(userUpdateDto.getFirstName()).orElse(user.getFirstName()));
-            user.setLastName(Optional.ofNullable(userUpdateDto.getLastName()).orElse(user.getLastName()));
-            user.setAddress(Optional.ofNullable(userUpdateDto.getAddress()).orElse(user.getAddress()));
-            user.setPhone(Optional.ofNullable(userUpdateDto.getPhone()).orElse(user.getPhone()));
-            user.setRole(Optional.ofNullable(userRole).orElse(user.getRole()));
+    public String updateUserRole(UUID id, UserRole userRole) {
+        UserEntity user = userRepository.findByNaturalId(id)
+                .orElseThrow(() -> new UserNotFoundException(id.toString()));
 
-            return userMapper.toUser(userRepository.save(user));
+        user.setRole(userRole);
+
+        try {
+            userRepository.save(user);
         } catch (Exception e) {
             throw new PersistenceException(e.getMessage());
         }
+        return "User role has been changed";
     }
 
     @Override

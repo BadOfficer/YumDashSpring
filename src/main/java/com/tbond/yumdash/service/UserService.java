@@ -3,7 +3,6 @@ package com.tbond.yumdash.service;
 import com.tbond.yumdash.common.UserRole;
 import com.tbond.yumdash.domain.User;
 import com.tbond.yumdash.dto.user.UserCreateDto;
-import com.tbond.yumdash.dto.user.UserUpdateDto;
 import com.tbond.yumdash.repository.entity.UserEntity;
 import org.springframework.data.domain.Page;
 
@@ -16,7 +15,7 @@ public interface UserService {
 
     User getUserById(UUID id);
 
-    User updateUser(UUID id, UserUpdateDto userUpdateDto, UserRole userRole);
+    String updateUserRole(UUID id, UserRole userRole);
 
     String deleteUser(UUID id);
 
