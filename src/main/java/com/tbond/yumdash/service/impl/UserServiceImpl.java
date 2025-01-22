@@ -7,11 +7,11 @@ import com.tbond.yumdash.dto.user.UserUpdateDto;
 import com.tbond.yumdash.repository.UserRepository;
 import com.tbond.yumdash.repository.entity.CartEntity;
 import com.tbond.yumdash.repository.entity.UserEntity;
+import com.tbond.yumdash.service.FileService;
 import com.tbond.yumdash.service.UserService;
 import com.tbond.yumdash.service.exception.UserExistException;
 import com.tbond.yumdash.service.exception.UserNotFoundException;
 import com.tbond.yumdash.service.mappers.UserMapper;
-import com.tbond.yumdash.utils.FileUploadUtils;
 import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final FileUploadUtils fileUploadUtils;
+    private final FileService fileService;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -89,9 +89,7 @@ public class UserServiceImpl implements UserService {
     public User updateUser(UUID id, UserUpdateDto userUpdateDto, UserRole userRole) {
         UserEntity user = userRepository.findByNaturalId(id).orElseThrow(() -> new UserNotFoundException(id.toString()));
         try {
-            String avatarPath = fileUploadUtils.saveImage(userUpdateDto.getAvatar());
-
-            user.setAvatar(Optional.ofNullable(avatarPath).orElse(user.getAvatar()));
+            user.setAvatar(Optional.ofNullable(fileService.uploadImage(userUpdateDto.getAvatar())).orElse(user.getAvatar()));
             user.setFirstName(Optional.ofNullable(userUpdateDto.getFirstName()).orElse(user.getFirstName()));
             user.setLastName(Optional.ofNullable(userUpdateDto.getLastName()).orElse(user.getLastName()));
             user.setAddress(Optional.ofNullable(userUpdateDto.getAddress()).orElse(user.getAddress()));

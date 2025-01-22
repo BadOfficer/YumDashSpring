@@ -97,6 +97,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(FileUploadException.class)
+    public ProblemDetail handleUploadFileException(FileUploadException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        problemDetail.setType(URI.create("file-upload-exception"));
+        problemDetail.setTitle("File Upload Exception");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    public ProblemDetail handleFileNotFoundException(FileNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        problemDetail.setType(URI.create("file-not-found"));
+        problemDetail.setTitle("File Not Found");
+        return problemDetail;
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();

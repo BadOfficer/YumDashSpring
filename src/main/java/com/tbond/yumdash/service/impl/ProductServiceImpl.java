@@ -9,12 +9,12 @@ import com.tbond.yumdash.repository.CategoryRepository;
 import com.tbond.yumdash.repository.ProductRepository;
 import com.tbond.yumdash.repository.entity.CategoryEntity;
 import com.tbond.yumdash.repository.entity.ProductEntity;
+import com.tbond.yumdash.service.FileService;
 import com.tbond.yumdash.service.ProductService;
 import com.tbond.yumdash.service.exception.CategoryNotFoundException;
 import com.tbond.yumdash.service.exception.ProductNotFoundException;
 import com.tbond.yumdash.service.mappers.CategoryMapper;
 import com.tbond.yumdash.service.mappers.ProductMapper;
-import com.tbond.yumdash.utils.FileUploadUtils;
 import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final ObjectMapper objectMapper;
-    private final FileUploadUtils fileUploadUtils;
+    private final FileService fileService;
 
     @Override
     @Transactional
@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService {
 
             List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {
             });
-            String imagePath = fileUploadUtils.saveImage(productDto.getImage());
+            String imagePath = fileService.uploadImage(productDto.getImage());
 
             Product newProduct = Product.builder()
                     .title(productDto.getTitle())
@@ -69,13 +69,16 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public Product getProductById(UUID productId) {
         return productMapper.toProduct(productRepository.findByNaturalId(productId)
-                .orElseThrow(() -> new ProductNotFoundException(productId.toString())));
+                .orElseThrow(() -> new ProductNotFoundException(String.format("Product with id %s not found", productId))));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Product getProductBySlug(String slug) {
-        return productMapper.toProduct(productRepository.findBySlug(slug));
+        ProductEntity product = productRepository.findBySlug(slug)
+                .orElseThrow(() -> new ProductNotFoundException(String.format("Product by slug %s not found", slug)));
+
+        return productMapper.toProduct(product);
     }
 
     @Override
@@ -101,25 +104,25 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public Product updateProduct(UUID productId, ProductRequestDto productDto) {
+        ProductEntity product = productRepository.findByNaturalId(productId)
+                .orElseThrow(() -> new ProductNotFoundException(String.format("Product with id %s not found", productId.toString())));
+
         try {
-            ProductEntity product = productRepository.findByNaturalId(productId)
-                    .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
 
             List<ProductSize> sizes = objectMapper.readValue(productDto.getSizes(), new TypeReference<>() {
             });
 
             CategoryEntity category = categoryRepository.findById(productDto.getCategoryId()).orElse(null);
 
-            String imagePath = fileUploadUtils.saveImage(productDto.getImage());
+            String imageUrl = Optional.ofNullable(fileService.uploadImage(productDto.getImage())).orElse(product.getImage());
 
             product.setId(product.getId());
-            product.setTitle(Optional.ofNullable(productDto.getTitle()).orElse(product.getTitle()));
             product.setTitle(Optional.ofNullable(productDto.getTitle()).orElse(product.getTitle()));
             product.setCategory(Optional.ofNullable(category).orElse(product.getCategory()));
             product.setDescription(Optional.ofNullable(productDto.getDescription()).orElse(product.getDescription()));
             product.setRating(product.getRating());
             product.setProductSizes(Optional.ofNullable(sizes).orElse(product.getProductSizes()));
-            product.setImage(Optional.ofNullable(imagePath).orElse(product.getImage()));
+            product.setImage(imageUrl);
             product.setDiscount(Optional.ofNullable(productDto.getDiscount()).orElse(product.getDiscount()));
 
             return productMapper.toProduct(productRepository.save(product));
@@ -132,7 +135,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public String deleteProduct(UUID productId) {
         ProductEntity product = productRepository.findByNaturalId(productId)
-                .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+                .orElseThrow(() -> new ProductNotFoundException(String.format("Product with id %s not found", productId.toString())));
         try {
             productRepository.deleteByNaturalId(productId);
             return String.format("Product %s deleted successfully", product.getTitle());

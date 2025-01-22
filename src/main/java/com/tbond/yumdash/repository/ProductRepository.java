@@ -6,11 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ProductRepository extends NaturalIdRepository<ProductEntity, UUID> {
-    ProductEntity findBySlug(String productSlug);
+    Optional<ProductEntity> findBySlug(String productSlug);
 
     Page<ProductEntity> findByCategoryId(Long categoryId, Pageable pageable);
 

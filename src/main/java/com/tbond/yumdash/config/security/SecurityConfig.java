@@ -12,6 +12,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -32,7 +37,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/products/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/v1/carts/**").hasAnyAuthority("CUSTOMER", "ADMIN"))
+                        .requestMatchers("/api/v1/carts/**").hasAnyAuthority("CUSTOMER", "ADMIN")
+                        .requestMatchers("/files/**").permitAll()
+                        .anyRequest().permitAll())
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
