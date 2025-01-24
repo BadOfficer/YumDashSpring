@@ -24,7 +24,7 @@ public class EmailVerificationEventListener implements ApplicationListener<Email
 
         verificationTokenService.saveVerificationToken(user.getId(), verificationToken);
 
-        String url = event.getApplicationUrl() + "/api/auth/verify-email?token=" + verificationToken;
+        String url = event.getApplicationUrl() + "/api/v1/auth/verify-email?token=" + verificationToken;
 
         emailService.sendVerificationEmail(user.getEmail(), url, user.getFirstName());
     }

@@ -7,5 +7,6 @@ import java.util.UUID;
 
 public interface UserProfileService {
     User getUserProfile(UUID userId);
+
     String updateUserProfile(UUID userId, UserUpdateDto dto);
 }

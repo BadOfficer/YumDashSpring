@@ -49,7 +49,7 @@ public class UserProfileController {
 
         return ResponseEntity.ok(userProfileService.updateUserProfile(userId, userUpdateDto));
     }
-
+    
     private UUID getUserId(Authentication authentication) {
         User user = userService.getUserByEmail(authentication.getName());
 

@@ -54,6 +54,4 @@ public class UserProfileServiceImpl implements UserProfileService {
             throw new PersistenceException(e.getMessage());
         }
     }
-
-
 }
