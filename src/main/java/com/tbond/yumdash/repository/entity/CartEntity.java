@@ -19,12 +19,14 @@ public class CartEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @OneToOne(mappedBy = "cart")
-    UserEntity user;
-
     @Column(nullable = false)
     Double totalPrice;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CartItemEntity> items;
+
+    @Override
+    public String toString() {
+        return "Cart " + id + ": contains " + items.size() + " items, total price = " + totalPrice;
+    }
 }

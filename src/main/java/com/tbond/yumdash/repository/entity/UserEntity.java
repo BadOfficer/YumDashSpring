@@ -54,10 +54,15 @@ public class UserEntity {
     @Column(name = "is_enabled", nullable = false)
     Boolean isEnabled;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrderEntity> orders;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
     CartEntity cart;
+
+    @Override
+    public String toString() {
+        return "User " + id;
+    }
 }

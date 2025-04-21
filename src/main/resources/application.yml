@@ -41,3 +41,7 @@ springdoc:
 jwt:
   secret: ${JWT_SECRET}
   expire: 86400000
+
+stripe:
+  secret-key: ${STRIPE_SECRET}
+  public-key: ${STRIPE_PUBLIC}

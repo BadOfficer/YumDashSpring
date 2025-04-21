@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/files/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/v1/profile/**").authenticated()
                         .requestMatchers("/api/v1/reset-password/**").permitAll()
+                        .requestMatchers("/api/v1/orders/**").authenticated()
                         .anyRequest().permitAll())
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
